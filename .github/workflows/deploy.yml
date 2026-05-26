@@ -41,4 +41,4 @@ jobs:
     # 5. Terraform Apply chalao (Yeh SIRF tab chalega jab code main branch mein merge hoga)
     - name: Terraform Apply
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      run: terraform apply -auto-approve -input=false
+      run: terraform apply -auto-approve -input=false 
