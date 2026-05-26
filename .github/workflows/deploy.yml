@@ -1,0 +1,44 @@
+name: 'Terraform CI/CD Pipeline'
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  terraform:
+    name: 'Terraform Job'
+    runs-on: ubuntu-latest
+    env:
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    steps:
+    # 1. GitHub ke runner par apna code le kar aao
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # 2. Terraform install karo runner par
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 4.74.0
+
+    # 3. Terraform Init chalao
+    - name: Terraform Init
+      run: terraform init
+
+    # 4. Terraform Plan chalao (Yeh PR aur Push dono par chalega)
+    - name: Terraform Plan
+      run: terraform plan -input=false
+
+    # 5. Terraform Apply chalao (Yeh SIRF tab chalega jab code main branch mein merge hoga)
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: terraform apply -auto-approve -input=false
